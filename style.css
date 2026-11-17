@@ -1,0 +1,164 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+body { background-color: #f1f5f9; color: #334155; padding: 20px; display: flex; justify-content: center; }
+#app { max-width: 720px; width: 100%; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+/* 헤더 & 네비게이션 */
+header h1 { font-size: 20px; text-align: center; margin-bottom: 12px; color: #0f172a; }
+nav { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 15px; flex-wrap: wrap; }
+.nav-btn { flex: 1; min-width: 80px; padding: 8px 4px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; text-align: center; }
+.nav-btn:hover { background: #e2e8f0; }
+
+/* SRS 네비게이션 버튼 & 배지 */
+.btn-srs-nav { position: relative; }
+.srs-count-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 2px;
+}
+
+/* 검색바 */
+.search-container { position: relative; margin-bottom: 20px; }
+#searchInput { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.search-item { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+.search-item:hover { background: #f8fafc; }
+
+/* 품사 필터 */
+.pos-filter-bar { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 4px; }
+.pos-btn { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 16px; background: white; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.pos-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+/* 학습 조작 바 */
+.study-controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; }
+.mode-switch-btns .mode-btn { padding: 4px 8px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; }
+.mode-switch-btns .mode-btn.active { background: #475569; color: white; }
+
+/* 🌟 단어 카드 (크기 확대 반영) */
+.card { 
+    border: 1px solid #e2e8f0; 
+    border-radius: 10px; 
+    padding: 35px 20px; /* 위아래 여백 확장 */
+    min-height: 260px;  /* 카드 최소 높이 확장 */
+    text-align: center; 
+    margin-bottom: 15px; 
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.card-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #64748b; }
+.badge { background: #e2e8f0; padding: 3px 10px; border-radius: 4px; font-weight: bold; }
+.badge-srs { background: #8b5cf6; color: white; }
+
+/* 🌟 폰트 크기 확대 반영 (한자, 발음, 뜻) */
+.word-kanji { font-size: 48px; font-weight: bold; margin-bottom: 12px; color: #0f172a; line-height: 1.2; }
+.word-kana { font-size: 24px; color: #2563eb; margin-bottom: 8px; font-weight: 500; }
+.word-meaning { font-size: 22px; color: #334155; font-weight: 500; }
+.hidden { display: none !important; }
+
+/* 상태 변경 버튼 & 네비게이션 */
+.status-action-btns { display: flex; gap: 8px; margin-bottom: 15px; }
+.status-btn { flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; background: white; }
+.status-btn.memorized { color: #16a34a; border-color: #86efac; }
+.status-btn.memorized:hover { background: #dcfce7; }
+.status-btn.confused { color: #d97706; border-color: #fde68a; }
+.status-btn.confused:hover { background: #fef3c7; }
+
+.nav-controls { display: flex; justify-content: space-between; gap: 8px; }
+
+/* 🔔 SRS 복습 페이지 스타일 */
+.srs-header { margin-bottom: 15px; }
+.srs-header h2 { font-size: 18px; color: #0f172a; }
+.srs-empty-box {
+    text-align: center;
+    padding: 50px 20px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #64748b;
+    margin-top: 15px;
+}
+.srs-feedback-btns { display: flex; gap: 8px; margin-top: 15px; }
+.srs-fb-btn {
+    flex: 1;
+    padding: 12px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.2s;
+}
+.srs-fb-btn small { font-size: 11px; font-weight: normal; opacity: 0.8; display: block; margin-top: 3px; }
+.srs-fb-btn.fail { color: #dc2626; border-color: #fca5a5; }
+.srs-fb-btn.fail:hover { background: #fee2e2; }
+.srs-fb-btn.hard { color: #d97706; border-color: #fde68a; }
+.srs-fb-btn.hard:hover { background: #fef3c7; }
+.srs-fb-btn.pass { color: #16a34a; border-color: #86efac; }
+.srs-fb-btn.pass:hover { background: #dcfce7; }
+
+/* 버튼 기본 공통 스타일 */
+.btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+.btn-primary { background: #2563eb; color: white; }
+.btn-secondary { background: #64748b; color: white; }
+.btn-success { background: #10b981; color: white; }
+.btn-danger { background: #ef4444; color: white; }
+.btn-accent { background: #8b5cf6; color: white; }
+.btn-outline { border: 1px solid #cbd5e1; background: white; color: #334155; }
+.btn-outline:hover { background: #f8fafc; }
+.btn-block { width: 100%; }
+
+/* 번역기 */
+.translator-container { margin-top: 25px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+.translator-container h3 { font-size: 14px; margin-bottom: 10px; }
+.translator-controls select { padding: 6px 10px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #cbd5e1; }
+#translateInput { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 8px; font-size: 14px; }
+.translator-btns { display: flex; gap: 6px; }
+.translator-result { margin-top: 10px; font-weight: bold; font-size: 15px; color: #1e293b; min-height: 24px; }
+
+/* 퀴즈 */
+.quiz-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; }
+.quiz-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; color: #64748b; }
+.quiz-question { text-align: center; margin-bottom: 20px; }
+.quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
+.choice { padding: 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; text-align: left; font-size: 14px; }
+.choice.correct { background: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: bold; }
+.choice.wrong { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+
+/* 오답 노터 및 통계 카드의 기본 설정 */
+.manage-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+.help-text { font-size: 12px; color: #64748b; margin: 4px 0 10px 0; }
+.custom-file-upload { display: inline-block; cursor: pointer; }
+
+/* ========================================= */
+/* 📱 PWA / 모바일 보정                         */
+/* ========================================= */
+html { -webkit-text-size-adjust: 100%; }
+body {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+button, .btn, .nav-btn, .choice, label { touch-action: manipulation; }
+button { -webkit-appearance: none; appearance: none; }
+input[type="text"], textarea, select { font-size: 16px; } /* iOS 입력 시 자동 확대 방지 */
+
+@media (max-width: 600px) {
+    body { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); background: #ffffff; }
+    #app { border-radius: 0; box-shadow: none; padding: 14px 14px 24px; min-height: 100vh; }
+    .nav-btn { min-height: 44px; font-size: 12px; }
+    .btn, .status-btn, .srs-fb-btn, .pos-btn, .mode-switch-btns .mode-btn { min-height: 44px; }
+    .word-kanji { font-size: 40px; }
+    .study-controls-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .nav-controls { flex-wrap: wrap; }
+    .nav-controls .btn { flex: 1; }
+    .translator-btns { flex-wrap: wrap; }
+    .quiz-choices { grid-template-columns: 1fr; }
+}

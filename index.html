@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="JP 단어장">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <title>JP Word Master - 일본어 단어장</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 🔝 헤더 & 네비게이션 -->
+        <header>
+            <h1>🇯🇵 JP WORD MASTER</h1>
+            <nav>
+                <button onclick="showPage('study')" class="nav-btn">단어 학습</button>
+                <button onclick="showPage('srs')" class="nav-btn btn-srs-nav">
+                    🔔 오늘의 복습 <span id="srsBadge" class="srs-count-badge">0</span>
+                </button>
+                <button onclick="showPage('quiz')" class="nav-btn">퀴즈</button>
+                <button onclick="showPage('wrong')" class="nav-btn">오답 노트</button>
+                <button onclick="showPage('score')" class="nav-btn">기록 & 통계</button>
+                <button onclick="showPage('manage')" class="nav-btn">데이터 관리</button>
+            </nav>
+        </header>
+
+        <!-- 🔍 상단 검색바 -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="한자, 발음(카나), 뜻으로 단어 검색..." autocomplete="off">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <main>
+            <!-- ========================================= -->
+            <!-- 📖 1. 단어 학습 페이지 (Study Page) -->
+            <!-- ========================================= -->
+            <section id="study" class="page">
+                <!-- 품사 필터 버튼 모음 -->
+                <div class="pos-filter-bar">
+                    <button class="pos-btn active" data-pos="전체">전체</button>
+                    <button class="pos-btn" data-pos="명사">명사</button>
+                    <button class="pos-btn" data-pos="동사">동사</button>
+                    <button class="pos-btn" data-pos="い형용사">い형용사</button>
+                    <button class="pos-btn" data-pos="な형용사">な형용사</button>
+                    <button class="pos-btn" data-pos="부사">부사</button>
+                    <button class="pos-btn" data-pos="기타">기타</button>
+                </div>
+
+                <!-- 암기 상태 토글 & 학습 모드 전환 버튼 -->
+                <div class="study-controls-bar">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="hideMemorizedToggle">
+                        <span>🟢 '완벽히 암기함' 단어 숨기기</span>
+                    </label>
+                    <div class="mode-switch-btns">
+                        <button id="singleStudyBtn" class="mode-btn active">한 단어씩 보기</button>
+                        <button id="batchStudyBtn" class="mode-btn">20개씩 묶음 보기</button>
+                    </div>
+                </div>
+
+                <!-- A. 한 단어씩 학습 모드 -->
+                <div id="singleStudyMode">
+                    <div class="card">
+                        <div class="card-header">
+                            <span id="posBadge" class="badge">품사</span>
+                            <span id="progress" class="progress-text">0 / 0</span>
+                        </div>
+                        <div class="card-body">
+                            <h2 id="word" class="word-kanji">단어장 업로드 필요</h2>
+                            <p id="reading" class="word-kana hidden"></p>
+                            <p id="meaning" class="word-meaning hidden">CSV 데이터를 등록해 주세요.</p>
+                        </div>
+                        <div class="card-footer">
+                            <button id="showBtn" class="btn btn-primary">정답 확인 (Space)</button>
+                            <button id="ttsBtn" class="btn btn-icon">🔊 발음 듣기</button>
+                        </div>
+                    </div>
+
+                    <!-- 단어 상태 변경 및 이동 컨트롤 -->
+                    <div class="status-action-btns">
+                        <button id="btnSetMemorized" class="status-btn memorized">🟢 완벽히 암기함 (SRS 적용)</button>
+                        <button id="btnSetConfused" class="status-btn confused">🟡 아직 헷갈림</button>
+                    </div>
+
+                    <div class="nav-controls">
+                        <button id="prevBtn" class="btn btn-outline">◀ 이전 (←)</button>
+                        <button id="randomBtn" class="btn btn-outline">🔀 랜덤</button>
+                        <button id="nextBtn" class="btn btn-outline">다음 (→) ▶</button>
+                    </div>
+                </div>
+
+                <!-- B. 20개씩 묶음 학습 모드 -->
+                <div id="batchStudyMode" class="hidden">
+                    <div class="batch-header">
+                        <span id="batchCount" class="batch-count-text">0 / 0</span>
+                        <div class="batch-actions">
+                            <button id="prevBatchBtn" class="btn btn-sm">◀ 이전 묶음</button>
+                            <button id="newBatchBtn" class="btn btn-sm">다음 묶음 ▶</button>
+                            <button id="batchQuizBtn" class="btn btn-sm btn-accent">⚡ 이 묶음으로 퀴즈</button>
+                        </div>
+                    </div>
+                    <div id="batchWordList" class="batch-word-list"></div>
+                </div>
+
+                <!-- C. 🌐 예문 & 단어 실시간 번역기 -->
+                <div class="translator-container">
+                    <h3>🌐 예문 & 단어 실시간 번역기</h3>
+                    <div class="translator-controls">
+                        <select id="translateDirection">
+                            <option value="ko|ja">한국어 ➔ 일본어</option>
+                            <option value="ja|ko">일본어 ➔ 한국어</option>
+                        </select>
+                    </div>
+                    <textarea id="translateInput" rows="2" placeholder="번역이나 예문 작성이 필요한 문장/단어를 입력하세요..."></textarea>
+                    <div class="translator-btns">
+                        <button id="translateBtn" class="btn btn-primary">번역하기</button>
+                        <button id="translateTtsBtn" class="btn btn-secondary">🔊 발음</button>
+                        <button id="addWordFromTranslatorBtn" class="btn btn-success">➕ 단어장에 추가</button>
+                    </div>
+                    <div id="translateResult" class="translator-result"></div>
+                </div>
+            </section>
+
+            <!-- ========================================= -->
+            <!-- 🔔 2. 망각 곡선 맞춤 복습 페이지 (SRS Review Page) -->
+            <!-- ========================================= -->
+            <section id="srs" class="page" style="display: none;">
+                <div class="srs-header">
+                    <h2>🧠 망각 곡선 맞춤 복습 (SRS)</h2>
+                    <p class="help-text">에빙하우스 망각 곡선(1일, 3일, 7일 후)에 따라 오늘 복습할 단어입니다.</p>
+                </div>
+
+                <!-- 오늘 복습할 단어가 없을 때 -->
+                <div id="srsEmpty" class="srs-empty-box">
+                    🎉 오늘 복습할 단어가 없습니다! 깔끔하게 완료하셨네요.
+                </div>
+
+                <!-- 복습 카드 영역 -->
+                <div id="srsContainer" class="srs-container" style="display: none;">
+                    <div class="card srs-card">
+                        <div class="card-header">
+                            <span id="srsStageBadge" class="badge badge-srs">복습 1단계</span>
+                            <span id="srsProgress" class="progress-text">0 / 0</span>
+                        </div>
+                        <div class="card-body">
+                            <h2 id="srsWord" class="word-kanji">-</h2>
+                            <p id="srsReading" class="word-kana hidden">-</p>
+                            <p id="srsMeaning" class="word-meaning hidden">-</p>
+                        </div>
+                        <div class="card-footer">
+                            <button id="srsShowBtn" class="btn btn-primary">정답 확인 (Space)</button>
+                            <button id="srsTtsBtn" class="btn btn-icon">🔊 발음 듣기</button>
+                        </div>
+                    </div>
+
+                    <!-- SRS 피드백 버튼 -->
+                    <div class="srs-feedback-btns">
+                        <button id="btnSrsFail" class="srs-fb-btn fail">❌ 잘 기억 안 남<br><small>(내일 다시 복습)</small></button>
+                        <button id="btnSrsHard" class="srs-fb-btn hard">🔺 헷갈림<br><small>(현재 단계 유지)</small></button>
+                        <button id="btnSrsPass" class="srs-fb-btn pass">⭕ 잘 기억남!<br><small>(다음 단계로 진행)</small></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================= -->
+            <!-- 🧩 3. 퀴즈 페이지 (Quiz Page) -->
+            <!-- ========================================= -->
+            <section id="quiz" class="page" style="display: none;">
+                <div class="quiz-card">
+                    <div class="quiz-header">
+                        <span id="quizPosBadge" class="badge">품사</span>
+                        <span id="quizProgress">문제 1 / 10</span>
+                        <span id="quizScore">점수: 0</span>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h2 id="quizWord" class="word-kanji">-</h2>
+                        <p id="quizKana" class="word-kana">-</p>
+                        <button id="quizTtsBtn" class="btn btn-sm">🔊</button>
+                    </div>
+
+                    <!-- 4지선다 선택지 -->
+                    <div id="quizChoices" class="quiz-choices"></div>
+
+                    <div id="quizMessage" class="quiz-message"></div>
+                    <button id="nextQuestionBtn" class="btn btn-primary btn-block" style="display: none;">다음 문제 (Space / Enter)</button>
+
+                    <!-- 퀴즈 결과 화면 -->
+                    <div id="quizResult" class="quiz-result" style="display: none;">
+                        <h2>🎉 퀴즈 종료!</h2>
+                        <p class="final-score-label">최종 점수</p>
+                        <div id="finalScore" class="final-score-val">0 / 10</div>
+                        <button onclick="startQuiz()" class="btn btn-primary">다시 풀기</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================= -->
+            <!-- 📝 4. 오답 노트 페이지 (Wrong Answers Page) -->
+            <!-- ========================================= -->
+            <section id="wrong" class="page" style="display: none;">
+                <div class="wrong-header">
+                    <h2>🔥 오답 노트</h2>
+                    <div class="wrong-btn-group">
+                        <button id="startWrongQuizBtn" class="btn btn-accent">🔥 오답 집중 퀴즈 풀기</button>
+                        <button id="clearWrongBtn" class="btn btn-danger">전체 비우기</button>
+                    </div>
+                </div>
+                <div id="wrongList" class="wrong-list"></div>
+            </section>
+
+            <!-- ========================================= -->
+            <!-- 📊 5. 기록 & 통계 페이지 (Scores & Logs Page) -->
+            <!-- ========================================= -->
+            <section id="score" class="page" style="display: none;">
+                <h2>📊 학습 통계 & 응시 기록</h2>
+                <div class="score-summary-grid">
+                    <div class="score-card">
+                        <h3>최고 점수</h3>
+                        <p id="bestScore" class="score-num">0 / 10</p>
+                    </div>
+                    <div class="score-card">
+                        <h3>최근 점수</h3>
+                        <p id="recentScore" class="score-num">0 / 10</p>
+                    </div>
+                </div>
+
+                <div class="log-section">
+                    <div class="log-header">
+                        <h3>최근 퀴즈 기록 (최대 10개)</h3>
+                        <button id="clearLogBtn" class="btn btn-sm btn-danger">기록 삭제</button>
+                    </div>
+                    <div id="quizLogList" class="quiz-log-list"></div>
+                </div>
+            </section>
+
+            <!-- ========================================= -->
+            <!-- 💾 6. 데이터 관리 페이지 (Data Management Page) -->
+            <!-- ========================================= -->
+            <section id="manage" class="page" style="display: none;">
+                <h2>💾 데이터 백업 및 관리</h2>
+
+                <div class="manage-card">
+                    <h3>📥 CSV 단어장 업로드</h3>
+                    <p class="help-text">CSV 형식: <code>한자, 히라가나, 뜻, 품사</code> 순서로 작성된 파일</p>
+                    <input type="file" id="fileInput" accept=".csv">
+                </div>
+
+                <div class="manage-card">
+                    <h3>🔄 데이터 백업 / 복원 (JSON)</h3>
+                    <p class="help-text">단어장 데이터, 암기 상태, 오답노트, 점수 기록을 백업하거나 복원합니다.</p>
+                    <div class="backup-btns">
+                        <button id="exportDataBtn" class="btn btn-success">💾 백업 파일 다운로드 (내보내기)</button>
+                        <label for="importDataInput" class="btn btn-primary custom-file-upload">
+                            📂 백업 파일 불러오기 (가져오기)
+                        </label>
+                        <input type="file" id="importDataInput" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 스크립트 연결 -->
+    <script src="app.js"></script>
+    <script>
+        // PWA: 서비스 워커 등록 (https 또는 localhost에서만 동작)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW 등록 실패:', err));
+            });
+        }
+    </script>
+</body>
+</html>
